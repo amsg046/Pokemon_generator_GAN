@@ -22,16 +22,22 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-data_dir = "data/Abstract_gallery"
+data_dir = "data/images"
 random.seed(53)
 
 # Image Parameters
 image_px = 128
-batch_size = 128
+batch_size = 4
 # First series for stats var is mean for each channel that will be subtracted during norm, 
 # second series is std that will be divided during norm
 stats = (.5, .5, .5), (.5, .5, .5) 
 
+#import opendatasets as od
+#dataset_url = 'https://www.kaggle.com/splcher/animefacedataset'
+#od.download(dataset_url)
+#import os
+
+#data_dir = './animefacedataset'
 
 train_ds = ImageFolder(data_dir, transform=T.Compose([
     T.Resize(image_px),
@@ -40,7 +46,12 @@ train_ds = ImageFolder(data_dir, transform=T.Compose([
     T.Normalize(*stats)
     ]))
 
-train_dl = DataLoader(train_ds, batch_size, shuffle=True, num_workers=3, pin_memory=True)
+train_dl = DataLoader(train_ds, batch_size, shuffle=True, pin_memory=True)
+#train_dl = DataLoader(train_ds, batch_size, shuffle=True, num_workers=3, pin_memory=True)
+#train_dl = DataLoader(train_ds, batch_size, shuffle=True)
+
+
+
 
 def denormalize(tensors):
     # Following code assumes same value for mean norm and std norm across all channels
@@ -86,7 +97,11 @@ class DeviceDataLoader():
     def __len__(self):
         """Number of batches"""
         return len(self.dl)
-    
+
+device = get_default_device()
+device
+train_dl = DeviceDataLoader(train_dl, device)
+
 # Define discriminator network
 
 discriminator = nn.Sequential(
@@ -123,6 +138,7 @@ discriminator = nn.Sequential(
     nn.Sigmoid()
     )
 
+discriminator = to_device(discriminator, device)
 
 # Define generator network
 
@@ -159,12 +175,9 @@ generator = nn.Sequential(
     # out: 3 x 128 x 128
     )
 
+generator = to_device(generator, device)
+
 #------------------------ Training ------------------------# 
-
-device = get_default_device()
-device
-
-train_dl = DeviceDataLoader(train_dl, device)
 
 def generate_images(latent_vector = torch.randn(batch_size, latent_size, 1, 1, device=device)):
     latent_vector = torch.randn(batch_size, latent_size, 1, 1, device=device)
@@ -269,8 +282,8 @@ def fit(epochs, lr, start_idx=1):
     
     return losses_g, losses_d, real_scores, fake_scores
 
-lr = 0.0004
-epochs = 2
+lr = 0.0001
+epochs = 50
 
 history = fit(epochs, lr)
 
