@@ -6,6 +6,11 @@
 ## Code and Resources Used
 **Python Version:** 3.7.4 <br />
 **Packages:** IPython, jupyter, matplotlib, os, random, torch, torchvision, tqdm <br />
-**Inspiration:** https://jovian.ai/aakashns/06b-anime-dcgan
-**DC-GAN Research:** [Alec Radford, Luke Metz, Soumith Chintala] https://arxiv.org/abs/1511.06434
-**Datset:** 
+**Inspiration:** https://jovian.ai/aakashns/06b-anime-dcgan <br />
+**DC-GAN Research:** [Alec Radford, Luke Metz, Soumith Chintala] https://arxiv.org/abs/1511.06434 <br />
+**Datset:** [Vishal Subbiah] https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types <br /> 
+
+## Results
+![](data/pokemon_dataset_images.png)  |  ![](data/results.png)
+:-------------------------:|:-------------------------:
+*Samples from original data* |  *Samples from generated data*
