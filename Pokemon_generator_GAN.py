@@ -32,12 +32,7 @@ batch_size = 4
 # second series is std that will be divided during norm
 stats = (.5, .5, .5), (.5, .5, .5) 
 
-#import opendatasets as od
-#dataset_url = 'https://www.kaggle.com/splcher/animefacedataset'
-#od.download(dataset_url)
-#import os
 
-#data_dir = './animefacedataset'
 
 train_ds = ImageFolder(data_dir, transform=T.Compose([
     T.Resize(image_px),
@@ -47,10 +42,6 @@ train_ds = ImageFolder(data_dir, transform=T.Compose([
     ]))
 
 train_dl = DataLoader(train_ds, batch_size, shuffle=True, pin_memory=True)
-#train_dl = DataLoader(train_ds, batch_size, shuffle=True, num_workers=3, pin_memory=True)
-#train_dl = DataLoader(train_ds, batch_size, shuffle=True)
-
-
 
 
 def denormalize(tensors):
