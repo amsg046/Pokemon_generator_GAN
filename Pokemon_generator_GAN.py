@@ -23,7 +23,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 data_dir = "data/images"
-random.seed(53)
+seed = 53
+random.seed(seed)
+torch.manual_seed(seed)
 
 # Image Parameters
 image_px = 128
@@ -274,11 +276,27 @@ def fit(epochs, lr, start_idx=1):
     return losses_g, losses_d, real_scores, fake_scores
 
 lr = 0.0001
-epochs = 50
+epochs = 50 # set back to 50
 
 history = fit(epochs, lr)
 
 losses_g, losses_d, real_scores, fake_scores = history
+
+plt.figure()
+plt.plot(losses_g, label="Generator Loss")
+plt.plot(losses_d, label="Discriminator Loss")
+plt.title("Geneartor and Discriminator Loss by Epoch")
+plt.legend()
+plt.grid()
+plt.show()
+
+plt.figure()
+plt.plot(real_scores, label="Real Data Score")
+plt.plot(fake_scores, label="Fake Data Score")
+plt.title("Real and Fake Data Score by Epoch")
+plt.legend()
+plt.grid()
+plt.show()
 
 # Save the model checkpoints 
 torch.save(generator.state_dict(), 'G.pth')
