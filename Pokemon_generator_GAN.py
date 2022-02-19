@@ -35,7 +35,6 @@ batch_size = 4
 stats = (.5, .5, .5), (.5, .5, .5) 
 
 
-
 train_ds = ImageFolder(data_dir, transform=T.Compose([
     T.Resize(image_px),
     T.CenterCrop(image_px),
@@ -242,6 +241,22 @@ def save_image_set(index, latent_tensors, show=True):
 fixed_latent = torch.randn(64, latent_size, 1, 1, device=device)
 save_image_set(0, fixed_latent)
 
+def gradient_flow_plot(parameters, ax, title): 
+    avg_grads = []
+    layer_names = []
+    title_str = title + " Gradient Flow"
+    for name, param in parameters:
+        if(param.requires_grad) and ("bias" not in name):
+            layer_names.append(name)
+            avg_grads.append(param.grad.to("cpu").abs().mean())
+        ax.plot(avg_grads, alpha=0.3, color="b")
+        ax.hlines(0, 0, len(avg_grads), linewidth=1, color="k" )
+        ax.set_xticks(range(0,len(avg_grads), 1), layer_names, rotation="vertical")
+        ax.set_xlim(xmin=0, xmax=len(avg_grads))
+        ax.set_xlabel("Layers")
+        ax.set_ylabel("average gradient")
+        ax.set_title(title_str)
+        ax.grid(True)
 
 def fit(epochs, lr, start_idx=1):
     torch.cuda.empty_cache()
@@ -256,10 +271,19 @@ def fit(epochs, lr, start_idx=1):
     opt_d = torch.optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
     opt_g = torch.optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
     
+    avg_gen_grad = [] 
+    layers = []
+
+    fig1, ax1 = plt.subplots()
+    fig2, ax2 = plt.subplots()
+    
     for epoch in range(epochs):
         for real_images, _ in train_dl:
             loss_d, loss_g, real_score, fake_score = train(real_images, opt_d, opt_g)
-            
+            # print gradient values
+            gradient_flow_plot(generator.named_parameters(), ax1, "Generator")
+            gradient_flow_plot(discriminator.named_parameters(), ax2, "Discriminator")
+
         # Record losses & scores
         losses_g.append(loss_g)
         losses_d.append(loss_d)
@@ -275,8 +299,10 @@ def fit(epochs, lr, start_idx=1):
     
     return losses_g, losses_d, real_scores, fake_scores
 
+plt.show() 
+
 lr = 0.0001
-epochs = 50 # set back to 50
+epochs = 50
 
 history = fit(epochs, lr)
 
@@ -303,5 +329,7 @@ torch.save(generator.state_dict(), 'G.pth')
 torch.save(discriminator.state_dict(), 'D.pth')
 
 Image('./generated/generated-images-0001.png')
+
+
 
 
